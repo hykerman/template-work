@@ -21,6 +21,9 @@
         "networkSecurityGroups_gy_vm_nsg_name": {
             "defaultValue": "gy-vm-nsg",
             "type": "String"
+        },
+        "vm_password": {
+            "type": "securestring"
         }
     },
     "variables": {},
@@ -129,6 +132,7 @@
                 "osProfile": {
                     "computerName": "[parameters('virtualMachines_gy_vm_name')]",
                     "adminUsername": "adminuser",
+                    "adminPassword": "[parameters('vm_password')]",
                     "linuxConfiguration": {
                         "disablePasswordAuthentication": false,
                         "provisionVMAgent": true,
