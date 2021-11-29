@@ -226,6 +226,27 @@
                     "id": "[resourceId('Microsoft.Network/networkSecurityGroups', parameters('networkSecurityGroups_gy_vm_nsg_name'))]"
                 }
             }
-        }
+        },
+        {
+            "type": "Microsoft.Compute/virtualMachines/extensions",
+            "apiVersion": "2021-07-01",
+            "name": "[concat(variables('virtualMachines_gy_vm_name'),'/', 'InstallVM_Packages')]",
+            "location": "centralus",
+            "dependsOn": [
+              "[concat('Microsoft.Compute/virtualMachines/',variables('virtualMachines_gy_vm_name'))]"
+            ],
+            "properties": {
+              "publisher": "Microsoft.Compute",
+              "type": "CustomScriptExtension",
+              "typeHandlerVersion": "1.7",
+              "autoUpgradeMinorVersion": true,
+              "settings": {
+                "fileUris": [
+                  "https://raw.githubusercontent.com/hykerman/az-scripts/main/install_packages.sh"
+                ],
+                "commandToExecute": "./install_packges.sh"
+              }
+            }
+          }
     ]
 }
