@@ -230,10 +230,10 @@
         {
             "type": "Microsoft.Compute/virtualMachines/extensions",
             "apiVersion": "2021-07-01",
-            "name": "[concat(variables('virtualMachines_gy_vm_name'),'/', 'InstallVM_Packages')]",
+            "name": "[concat(parameters('virtualMachines_gy_vm_name'),'/', 'InstallVM_Packages')]",
             "location": "centralus",
             "dependsOn": [
-              "[concat('Microsoft.Compute/virtualMachines/',variables('virtualMachines_gy_vm_name'))]"
+              "[concat('Microsoft.Compute/virtualMachines/',parameters('virtualMachines_gy_vm_name'))]"
             ],
             "properties": {
               "publisher": "Microsoft.Compute",
