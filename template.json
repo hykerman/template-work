@@ -228,10 +228,9 @@
             }
         },
         {
-            "name": "config-app",
-            "type": "Extensions",
-            "apiVersion": "2019-03-01",
             "name": "[concat(parameters('virtualMachines_gy_vm_name'),'/', 'InstallVM_Packages')]",
+            "type": "Microsoft.Compute/virtualMachines/extensions",
+            "apiVersion": "2019-03-01",
             "location": "centralus",
             "dependsOn": [
               "[concat('Microsoft.Compute/virtualMachines/',parameters('virtualMachines_gy_vm_name'))]"
