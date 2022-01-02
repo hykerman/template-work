@@ -2,37 +2,34 @@
     "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
     "contentVersion": "1.0.0.0",
     "parameters": {
-        "virtualMachines_gy_vm_name": {
+        "vm_hlq": {
             "defaultValue": "gy-vm",
             "type": "String"
         },
-        "virtualNetworks_gy_vnet_name": {
-            "defaultValue": "gy-vnet",
-            "type": "String"
-        },
-        "networkInterfaces_gy_vm824_name": {
-            "defaultValue": "gy-vm824",
-            "type": "String"
-        },
-        "publicIPAddresses_gy_vm_ip_name": {
-            "defaultValue": "gy-vm-ip",
-            "type": "String"
-        },
-        "networkSecurityGroups_gy_vm_nsg_name": {
-            "defaultValue": "gy-vm-nsg",
-            "type": "String"
+        "vm_username":{
+            "type":"securestring"
         },
         "vm_password": {
             "type": "securestring"
+        },
+        "vm_location": {
+            "defaultValue": "[resourceGroup().location]",
+            "type": "string"
         }
     },
-    "variables": {},
+    "variables": {
+        "vm_name": "[concat(parameters('vm_hlq'), '-vm')]",
+        "vnet_name": "[concat(parameters('vm_hlq'), '-vnet')]",
+        "networkInterfaces_name": "[concat(parameters('vm_hlq'), '-networkinterface')]",
+        "publicIPAddresses_ip_name": "[concat(parameters('vm_hlq'), '-vm-ip')]",
+        "networkSecurityGroups_name": "[concat(parameters('vm_hlq'),'-vm-nsg')]"
+    },
     "resources": [
         {
             "type": "Microsoft.Network/networkSecurityGroups",
             "apiVersion": "2020-11-01",
-            "name": "[parameters('networkSecurityGroups_gy_vm_nsg_name')]",
-            "location": "centralus",
+            "name": "[variables('networkSecurityGroups_name')]",
+            "location": "[parameters('vm_location')]",
             "properties": {
                 "securityRules": [
                     {
@@ -58,8 +55,8 @@
         {
             "type": "Microsoft.Network/publicIPAddresses",
             "apiVersion": "2020-11-01",
-            "name": "[parameters('publicIPAddresses_gy_vm_ip_name')]",
-            "location": "centralus",
+            "name": "[variables('publicIPAddresses_ip_name')]",
+            "location": "[parameters('vm_location')]",
             "sku": {
                 "name": "Basic",
                 "tier": "Regional"
@@ -74,8 +71,8 @@
         {
             "type": "Microsoft.Network/virtualNetworks",
             "apiVersion": "2020-11-01",
-            "name": "[parameters('virtualNetworks_gy_vnet_name')]",
-            "location": "centralus",
+            "name": "[variables('vnet_name')]",
+            "location": "[parameters('vm_location')]",
             "properties": {
                 "addressSpace": {
                     "addressPrefixes": [
@@ -100,10 +97,10 @@
         {
             "type": "Microsoft.Compute/virtualMachines",
             "apiVersion": "2021-07-01",
-            "name": "[parameters('virtualMachines_gy_vm_name')]",
-            "location": "centralus",
+            "name": "[variables('vm_name')]",
+            "location": "[parameters('vm_location')]",
             "dependsOn": [
-                "[resourceId('Microsoft.Network/networkInterfaces', parameters('networkInterfaces_gy_vm824_name'))]"
+                "[resourceId('Microsoft.Network/networkInterfaces', variables('networkInterfaces_name'))]"
             ],
             "properties": {
                 "hardwareProfile": {
@@ -118,7 +115,7 @@
                     },
                     "osDisk": {
                         "osType": "Linux",
-                        "name": "[concat(parameters('virtualMachines_gy_vm_name'), '_disk1_9fbcc534804646b69092d9ce6f474719')]",
+                        "name": "[concat(variables('vm_name'), '_disk1_9fbcc534804646b69092d9ce6f474719')]",
                         "createOption": "FromImage",
                         "caching": "ReadWrite",
                         "managedDisk": {
@@ -130,8 +127,8 @@
                     "dataDisks": []
                 },
                 "osProfile": {
-                    "computerName": "[parameters('virtualMachines_gy_vm_name')]",
-                    "adminUsername": "adminuser",
+                    "computerName": "[variables('vm_name')]",
+                    "adminUsername": "[parameters('vm_username')]",
                     "adminPassword": "[parameters('vm_password')]",
                     "linuxConfiguration": {
                         "disablePasswordAuthentication": false,
@@ -147,7 +144,7 @@
                 "networkProfile": {
                     "networkInterfaces": [
                         {
-                            "id": "[resourceId('Microsoft.Network/networkInterfaces', parameters('networkInterfaces_gy_vm824_name'))]"
+                            "id": "[resourceId('Microsoft.Network/networkInterfaces', variables('networkInterfaces_name'))]"
                         }
                     ]
                 }
@@ -156,9 +153,9 @@
         {
             "type": "Microsoft.Network/networkSecurityGroups/securityRules",
             "apiVersion": "2020-11-01",
-            "name": "[concat(parameters('networkSecurityGroups_gy_vm_nsg_name'), '/SSH')]",
+            "name": "[concat(variables('networkSecurityGroups_name'), '/SSH')]",
             "dependsOn": [
-                "[resourceId('Microsoft.Network/networkSecurityGroups', parameters('networkSecurityGroups_gy_vm_nsg_name'))]"
+                "[resourceId('Microsoft.Network/networkSecurityGroups', variables('networkSecurityGroups_name'))]"
             ],
             "properties": {
                 "protocol": "TCP",
@@ -178,9 +175,9 @@
         {
             "type": "Microsoft.Network/virtualNetworks/subnets",
             "apiVersion": "2020-11-01",
-            "name": "[concat(parameters('virtualNetworks_gy_vnet_name'), '/default')]",
+            "name": "[concat(variables('vnet_name'), '/default')]",
             "dependsOn": [
-                "[resourceId('Microsoft.Network/virtualNetworks', parameters('virtualNetworks_gy_vnet_name'))]"
+                "[resourceId('Microsoft.Network/virtualNetworks', variables('vnet_name'))]"
             ],
             "properties": {
                 "addressPrefix": "10.0.0.0/24",
@@ -192,12 +189,12 @@
         {
             "type": "Microsoft.Network/networkInterfaces",
             "apiVersion": "2020-11-01",
-            "name": "[parameters('networkInterfaces_gy_vm824_name')]",
-            "location": "centralus",
+            "name": "[variables('networkInterfaces_name')]",
+            "location": "[parameters('vm_location')]",
             "dependsOn": [
-                "[resourceId('Microsoft.Network/publicIPAddresses', parameters('publicIPAddresses_gy_vm_ip_name'))]",
-                "[resourceId('Microsoft.Network/virtualNetworks/subnets', parameters('virtualNetworks_gy_vnet_name'), 'default')]",
-                "[resourceId('Microsoft.Network/networkSecurityGroups', parameters('networkSecurityGroups_gy_vm_nsg_name'))]"
+                "[resourceId('Microsoft.Network/publicIPAddresses', variables('publicIPAddresses_ip_name'))]",
+                "[resourceId('Microsoft.Network/virtualNetworks/subnets', variables('vnet_name'), 'default')]",
+                "[resourceId('Microsoft.Network/networkSecurityGroups', variables('networkSecurityGroups_name'))]"
             ],
             "properties": {
                 "ipConfigurations": [
@@ -207,10 +204,10 @@
                             "privateIPAddress": "10.0.0.4",
                             "privateIPAllocationMethod": "Dynamic",
                             "publicIPAddress": {
-                                "id": "[resourceId('Microsoft.Network/publicIPAddresses', parameters('publicIPAddresses_gy_vm_ip_name'))]"
+                                "id": "[resourceId('Microsoft.Network/publicIPAddresses', variables('publicIPAddresses_ip_name'))]"
                             },
                             "subnet": {
-                                "id": "[resourceId('Microsoft.Network/virtualNetworks/subnets', parameters('virtualNetworks_gy_vnet_name'), 'default')]"
+                                "id": "[resourceId('Microsoft.Network/virtualNetworks/subnets', variables('vnet_name'), 'default')]"
                             },
                             "primary": true,
                             "privateIPAddressVersion": "IPv4"
@@ -223,17 +220,17 @@
                 "enableAcceleratedNetworking": false,
                 "enableIPForwarding": false,
                 "networkSecurityGroup": {
-                    "id": "[resourceId('Microsoft.Network/networkSecurityGroups', parameters('networkSecurityGroups_gy_vm_nsg_name'))]"
+                    "id": "[resourceId('Microsoft.Network/networkSecurityGroups', variables('networkSecurityGroups_name'))]"
                 }
             }
         },
         {
-            "name": "[concat(parameters('virtualMachines_gy_vm_name'),'/', 'InstallVM_Packages')]",
+            "name": "[concat(variables('vm_name'),'/', 'InstallVM_Packages')]",
             "type": "Microsoft.Compute/virtualMachines/extensions",
             "apiVersion": "2019-03-01",
-            "location": "centralus",
+            "location": "[parameters('vm_location')]",
             "dependsOn": [
-              "[concat('Microsoft.Compute/virtualMachines/',parameters('virtualMachines_gy_vm_name'))]"
+              "[concat('Microsoft.Compute/virtualMachines/',variables('vm_name'))]"
             ],
             "properties": {
               "publisher": "Microsoft.Azure.Extensions",
