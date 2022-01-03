@@ -3,7 +3,7 @@
     "contentVersion": "1.0.0.0",
     "parameters": {
         "vm_hlq": {
-            "defaultValue": "gy-vm",
+            "defaultValue": "gy",
             "type": "String"
         },
         "vm_username":{
